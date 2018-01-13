@@ -73,6 +73,7 @@ func drugLookup(drugName string) (string, error) {
 	err = decoder.Decode(&drugData)
 	if err != nil {
 		log.Println("Error parsing drug data", err)
+		log.Println(res.Body)
 		return "Error parsing drug data!", err
 	}
 	if len(drugData.Results) < 1 {
@@ -104,8 +105,7 @@ func receiveMsg(w http.ResponseWriter, r *http.Request) {
 	senderID := postData.Entry[0].Messaging[0].Sender.ID
 	msgText := postData.Entry[0].Messaging[0].Message.Text
 	if msgText != "" {
-		msgText = "Fetching data on drug: " + msgText
-		sendMsg(senderID, msgText, []ReplyButton{})
+		sendMsg(senderID, "Fetching data on drug: "+msgText, []ReplyButton{})
 		if msg, err := drugLookup(msgText); err == nil {
 			sendMsg(senderID, msg, []ReplyButton{})
 		}
