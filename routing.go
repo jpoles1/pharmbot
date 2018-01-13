@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/gorilla/mux"
 )
@@ -60,12 +59,11 @@ type OutgoingMessage struct {
 	} `json:"message"`
 }
 
-func drugLookup(drugName string) (string, error) {
+func drugLookup(recipientID string, drugName string) {
 	apiURL := "https://api.fda.gov/drug/label.json?search=openfda.generic_name=" + drugName
 	res, err := http.Get(apiURL)
 	if err != nil {
 		log.Println("Error fetching drug data: ", err)
-		return "Error fetching drug data! I'm sorry :(", err
 	}
 	defer res.Body.Close()
 	var drugData DrugData
@@ -74,17 +72,16 @@ func drugLookup(drugName string) (string, error) {
 	if err != nil {
 		log.Println("Error parsing drug data", err)
 		log.Println(res.Body)
-		return "Error parsing drug data!", err
 	}
 	if len(drugData.Results) < 1 {
-		return "No results found :(", nil
+		sendMsg(recipientID, "No results found :(", []ReplyButton{})
 	}
 	msg := fmt.Sprintf("Drug %s (%d):\n", drugName, drugData.Meta.Results.Total)
-	msg += strings.Repeat("-", 10) + "\n"
-	msg += fmt.Sprintf("Description: %s\n", drugData.Results[0].Description)
-	msg += strings.Repeat("-", 10) + "\n"
-	msg += fmt.Sprintf("Mechanism of Action: %s\n", drugData.Results[0].MechanismOfAction)
-	return msg, nil
+	sendMsg(recipientID, msg, []ReplyButton{})
+	msg = fmt.Sprintf("Description: %s\n", drugData.Results[0].Description)
+	sendMsg(recipientID, msg, []ReplyButton{})
+	msg = fmt.Sprintf("Mechanism of Action: %s\n", drugData.Results[0].MechanismOfAction)
+	sendMsg(recipientID, msg, []ReplyButton{})
 }
 func receiveMsg(w http.ResponseWriter, r *http.Request) {
 	var postData IncomingMessage
@@ -106,9 +103,7 @@ func receiveMsg(w http.ResponseWriter, r *http.Request) {
 	msgText := postData.Entry[0].Messaging[0].Message.Text
 	if msgText != "" {
 		sendMsg(senderID, "Fetching data on drug: "+msgText, []ReplyButton{})
-		if msg, err := drugLookup(msgText); err == nil {
-			sendMsg(senderID, msg, []ReplyButton{})
-		}
+		drugLookup(senderID, msgText)
 	} else {
 		log.Println("Unknown Message Format!")
 		log.Println("Raw Data:", r.Body)

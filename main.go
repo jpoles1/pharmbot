@@ -20,7 +20,6 @@ func init() {
 	if fbToken == "" {
 		log.Fatal("No FB Access Token supplied in .env config file!")
 	}
-	fmt.Println(drugLookup("propranalol"))
 }
 func main() {
 	//Request routing
