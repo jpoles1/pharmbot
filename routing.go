@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -64,6 +65,7 @@ func drugLookup(recipientID string, drugName string) {
 	res, err := http.Get(apiURL)
 	if err != nil {
 		log.Println("Error fetching drug data: ", err)
+		return
 	}
 	defer res.Body.Close()
 	var drugData DrugData
@@ -72,15 +74,17 @@ func drugLookup(recipientID string, drugName string) {
 	if err != nil {
 		log.Println("Error parsing drug data", err)
 		log.Println(res.Body)
+		return
 	}
 	if len(drugData.Results) < 1 {
 		sendMsg(recipientID, "No results found :(", []ReplyButton{})
+		return
 	}
 	msg := fmt.Sprintf("Found %d results for %s\n", drugData.Meta.Results.Total, drugName)
 	sendMsg(recipientID, msg, []ReplyButton{})
-	msg = fmt.Sprintf("Description: %s\n", drugData.Results[0].Description[0:1990])
+	msg = fmt.Sprintf("Description: %s\n", drugData.Results[0].Description)
 	sendMsg(recipientID, msg, []ReplyButton{})
-	msg = fmt.Sprintf("Mechanism of Action: %s\n", drugData.Results[0].MechanismOfAction[0:1990])
+	msg = fmt.Sprintf("Mechanism of Action: %s\n", drugData.Results[0].MechanismOfAction)
 	sendMsg(recipientID, msg, []ReplyButton{})
 }
 func receiveMsg(w http.ResponseWriter, r *http.Request) {
@@ -126,9 +130,22 @@ func sendJSON(url string, jsonData []byte) {
 	body, _ := ioutil.ReadAll(resp.Body)
 	fmt.Println("Response Body:", string(body))
 }
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
 func sendMsg(recipientID string, msgText string, replyButtons []ReplyButton) {
 	msgData := OutgoingMessage{}
 	msgData.Recipient.ID = recipientID
+	if len(msgText) > 1990 {
+		for i := 0; i < int(math.Ceil(float64(len(msgText))/1990)); i++ {
+			msgText = msgText[i*1990 : (min(len(msgText), (i+1)*1990) - 1)]
+			sendMsg(recipientID, msgText, replyButtons)
+		}
+		return
+	}
 	msgData.Message.Text = msgText
 	msgData.Message.ReplyButtons = replyButtons
 	jsonData, _ := json.Marshal(msgData)
