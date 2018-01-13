@@ -61,7 +61,8 @@ type OutgoingMessage struct {
 }
 
 func drugLookup(recipientID string, drugName string) {
-	apiURL := "https://api.fda.gov/drug/label.json?search=openfda.generic_name=" + drugName
+	//apiURL := "https://api.fda.gov/drug/label.json?search=openfda.substance_name=" + drugName + "brand_name=" + drugName
+	apiURL := "https://api.fda.gov/drug/label.json?search=brand_name=" + drugName
 	res, err := http.Get(apiURL)
 	if err != nil {
 		log.Println("Error fetching drug data: ", err)
@@ -82,10 +83,14 @@ func drugLookup(recipientID string, drugName string) {
 	}
 	msg := fmt.Sprintf("Found %d results for %s\n", drugData.Meta.Results.Total, drugName)
 	sendMsg(recipientID, msg, []ReplyButton{})
-	msg = fmt.Sprintf("Description: %s\n", drugData.Results[0].Description)
+	msg = fmt.Sprintf("Mechanism of Action: %s\n", drugData.Results[0].Openfda.PharmClassMoa)
+	sendMsg(recipientID, msg, []ReplyButton{})
+	msg = fmt.Sprintf("Mechanism of Action (EPC): %s\n", drugData.Results[0].Openfda.PharmClassEpc)
+	sendMsg(recipientID, msg, []ReplyButton{})
+	/*msg = fmt.Sprintf("Description: %s\n", drugData.Results[0].Description)
 	sendMsg(recipientID, msg, []ReplyButton{})
 	msg = fmt.Sprintf("Mechanism of Action: %s\n", drugData.Results[0].MechanismOfAction)
-	sendMsg(recipientID, msg, []ReplyButton{})
+	sendMsg(recipientID, msg, []ReplyButton{})*/
 }
 func receiveMsg(w http.ResponseWriter, r *http.Request) {
 	var postData IncomingMessage
