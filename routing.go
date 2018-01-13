@@ -76,11 +76,11 @@ func drugLookup(recipientID string, drugName string) {
 	if len(drugData.Results) < 1 {
 		sendMsg(recipientID, "No results found :(", []ReplyButton{})
 	}
-	msg := fmt.Sprintf("Drug %s (%d):\n", drugName, drugData.Meta.Results.Total)
+	msg := fmt.Sprintf("Found %d results for %s\n", drugData.Meta.Results.Total, drugName)
 	sendMsg(recipientID, msg, []ReplyButton{})
-	msg = fmt.Sprintf("Description: %s\n", drugData.Results[0].Description)
+	msg = fmt.Sprintf("Description: %s\n", drugData.Results[0].Description[0:1990])
 	sendMsg(recipientID, msg, []ReplyButton{})
-	msg = fmt.Sprintf("Mechanism of Action: %s\n", drugData.Results[0].MechanismOfAction)
+	msg = fmt.Sprintf("Mechanism of Action: %s\n", drugData.Results[0].MechanismOfAction[0:1990])
 	sendMsg(recipientID, msg, []ReplyButton{})
 }
 func receiveMsg(w http.ResponseWriter, r *http.Request) {
