@@ -62,7 +62,7 @@ type OutgoingMessage struct {
 
 func drugLookup(recipientID string, drugName string) {
 	//apiURL := "https://api.fda.gov/drug/label.json?search=openfda.substance_name=" + drugName + "brand_name=" + drugName
-	apiURL := "https://api.fda.gov/drug/label.json?search=brand_name=" + drugName
+	apiURL := "https://api.fda.gov/drug/label.json?search=substance_name.exact=" + drugName
 	res, err := http.Get(apiURL)
 	if err != nil {
 		log.Println("Error fetching drug data: ", err)
