@@ -47,6 +47,7 @@ type DrugData struct {
 			ProductType        []string `json:"product_type"`
 			Route              []string `json:"route"`
 			PharmClassMoa      []string `json:"pharm_class_moa"`
+			PharmClassCs       []string `json:"pharm_class_cs"`
 			ApplicationNumber  []string `json:"application_number"`
 			PharmClassEpc      []string `json:"pharm_class_epc"`
 		} `json:"openfda"`

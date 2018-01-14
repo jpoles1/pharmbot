@@ -85,7 +85,7 @@ func drugLookup(recipientID string, drugName string) {
 	sendMsg(recipientID, msg, []ReplyButton{})
 	msg = fmt.Sprintf("Mechanism of Action: %s\n", drugData.Results[0].Openfda.PharmClassMoa)
 	sendMsg(recipientID, msg, []ReplyButton{})
-	msg = fmt.Sprintf("Mechanism of Action (EPC): %s\n", drugData.Results[0].Openfda.PharmClassEpc)
+	msg = fmt.Sprintf("Mechanism of Action (EPC): %s\nChecmical Class: %s\n", drugData.Results[0].Openfda.PharmClassEpc, drugData.Results[0].Openfda.PharmClassCs)
 	sendMsg(recipientID, msg, []ReplyButton{})
 	/*msg = fmt.Sprintf("Description: %s\n", drugData.Results[0].Description)
 	sendMsg(recipientID, msg, []ReplyButton{})
